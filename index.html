@@ -3,107 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KaTiProPlan - Live Update</title>
+    <title>KaTiProPlan - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111827; }
-        details > summary { list-style: none; }
-        details > summary::-webkit-details-marker { display: none; }
-        details > summary::before {
-            content: '►'; margin-right: 0.75rem; font-size: 0.7em; color: #9CA3AF;
-            transition: transform 0.2s ease-in-out;
+        body { font-family: sans-serif; background-color: #111827; color: white; }
+        /* Modal für Login */
+        #login-modal {
+            position: fixed; inset: 0; background: #000; z-index: 50;
+            display: flex; justify-content: center; align-items: center;
         }
+        details > summary { list-style: none; cursor: pointer; }
+        details > summary::before { content: '►'; margin-right: 10px; color: gray; }
         details[open] > summary::before { transform: rotate(90deg); color: #60A5FA; }
-        .summary-bar {
-            background-image: linear-gradient(to right, #1E3A8A, #1C336E);
-            border: 1px solid rgba(96, 165, 250, 0.3);
-            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
-        }
+        .hide { display: none !important; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 antialiased">
+<body>
 
-    <div class="min-h-screen container mx-auto p-4 sm:p-6 lg:p-8">
-        <header class="text-center mb-8 pt-4">
-            <h1 class="text-4xl sm:text-5xl font-extrabold text-white">KaTiProPlan</h1>
-            <p id="timestamp" class="text-gray-400 mt-2 text-sm"></p>
+    <!-- LOGIN SCREEN -->
+    <div id="login-modal">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700 text-center">
+            <h1 class="text-3xl font-bold mb-2">KaTiProPlan</h1>
+            <p class="text-gray-400 mb-6">Bitte System wählen</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-left text-sm text-gray-400 mb-1">Anlage / Roboter</label>
+                    <select id="system-select" class="w-full p-3 bg-gray-900 border border-gray-600 rounded text-white focus:border-blue-500 outline-none">
+                        <!-- Wird per JS gefüllt -->
+                        <option value="">Lade Systeme...</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-left text-sm text-gray-400 mb-1">Passwort</label>
+                    <input type="password" id="password-input" class="w-full p-3 bg-gray-900 border border-gray-600 rounded text-white focus:border-blue-500 outline-none" placeholder="******">
+                </div>
+
+                <div class="flex items-center justify-between text-sm text-gray-400">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" id="remember-me" class="mr-2 rounded bg-gray-700"> Merken
+                    </label>
+                </div>
+
+                <button onclick="attemptLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded transition">
+                    Einloggen
+                </button>
+                <p id="error-msg" class="text-red-500 mt-2 text-sm hide">Falsches Passwort!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP (Versteckt bis Login) -->
+    <div id="app-content" class="min-h-screen container mx-auto p-4 hide">
+        <header class="text-center mb-8 pt-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-extrabold" id="header-title">Projekt Übersicht</h1>
+                <p class="text-gray-400 text-xs" id="last-update"></p>
+            </div>
+            <button onclick="logout()" class="text-sm text-red-400 border border-red-400 px-3 py-1 rounded hover:bg-red-900">Logout</button>
         </header>
 
-        <main>
-            <section class="mb-12 p-6 rounded-2xl summary-bar shadow-xl">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                    <div><p class="text-sm font-medium text-blue-200">Stutzen</p><p id="stutzen-count" class="text-3xl font-extrabold text-white mt-1">0</p></div>
-                    <div><p class="text-sm font-medium text-blue-200">K-Liner</p><p id="kliner-count" class="text-3xl font-extrabold text-white mt-1">0</p></div>
-                    <div><p class="text-sm font-medium text-blue-200">Projekte</p><p id="total-projects-count" class="text-3xl font-extrabold text-white mt-1">0</p></div>
-                    <div><p class="text-sm font-medium text-blue-200">Gesamt</p><p id="total-sanierungen-count" class="text-3xl font-extrabold text-white mt-1">0</p></div>
-                </div>
-            </section>
+        <section class="mb-12 p-6 bg-gradient-to-r from-blue-900 to-gray-900 rounded-2xl shadow-lg border border-gray-700">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div><p class="text-blue-300 text-sm">Stutzen</p><p id="count-stz" class="text-3xl font-bold">0</p></div>
+                <div><p class="text-blue-300 text-sm">K-Liner</p><p id="count-kl" class="text-3xl font-bold">0</p></div>
+                <div><p class="text-blue-300 text-sm">Projekte</p><p id="count-proj" class="text-3xl font-bold">0</p></div>
+                <div><p class="text-blue-300 text-sm">Gesamt</p><p id="count-all" class="text-3xl font-bold">0</p></div>
+            </div>
+        </section>
 
-            <section id="results-container" class="max-w-5xl mx-auto space-y-4"></section>
-        </main>
+        <div id="results-container" class="space-y-4"></div>
     </div>
 
     <script>
-        // --- HIER PASSIERT DIE MAGIE ---
-        // Python wird "null" durch die echten Daten ersetzen.
-        const PROJECT_DATA = {"projects": {"55104 Dorsten": {"stutzenSaniert": 2, "klinerSaniert": 0, "streets": {"Mittelstra\u00dfe": {"2123 - 2122": {"ges. Haltung": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-01", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "url": "", "date": "2025-12-02", "type": "video/mp4"}], "dates": ["2025-12-01", "2025-12-02"], "isSaniert": false}, "17,00m Muffe": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-02", "type": "video/mp4"}, {"name": "2 nach verschlie\u00dfen .mp4", "url": "", "date": "2025-12-02", "type": "video/mp4"}], "dates": ["2025-12-02"], "isSaniert": true}, "19,10m Muffe": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-02", "type": "video/mp4"}, {"name": "2 nach verschlie\u00dfen .mp4", "url": "", "date": "2025-12-02", "type": "video/mp4"}], "dates": ["2025-12-02"], "isSaniert": true}, "26,20m Muffe": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-02", "type": "video/mp4"}, {"name": "2 nach verschlie\u00dfen .mp4", "url": "", "date": "2025-12-02", "type": "video/mp4"}], "dates": ["2025-12-02"], "isSaniert": true}, "12,20m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}, {"name": "2 nach san..mp4", "url": "", "date": "2025-12-12", "type": "video/mp4"}], "dates": ["2025-12-04", "2025-12-12"], "isSaniert": true}, "15,60m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "16,80m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "25,80m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "3,30m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "31,90m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}}, "4119 - 2123": {"18,40m Stutzen": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-01", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "url": "", "date": "2025-12-01", "type": "video/mp4"}, {"name": "3 nach \u00f6ffnen.mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-01", "2025-12-04"], "isSaniert": false}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-01", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "url": "", "date": "2025-12-01", "type": "video/mp4"}], "dates": ["2025-12-01"], "isSaniert": false}, "12,90m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "21,80m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "34,10m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "35,00m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}}, "2121 - 2160": {"8,30m Stutzen": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-03", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "url": "", "date": "2025-12-03", "type": "video/mp4"}, {"name": "3 nach san..mp4", "url": "", "date": "2025-12-03", "type": "video/mp4"}, {"name": "4 nach Nacharbeit.mp4", "url": "", "date": "2025-12-03", "type": "video/mp4"}, {"name": "5 nach \u00f6ffnen.mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-03", "2025-12-04"], "isSaniert": true}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-03", "type": "video/mp4"}], "dates": ["2025-12-03"], "isSaniert": false}, "28,20m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}}, "2122 - 2121": {"17,20m Stutzen": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-03", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "url": "", "date": "2025-12-03", "type": "video/mp4"}, {"name": "3 nach \u00f6ffnen.mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-03", "2025-12-04"], "isSaniert": false}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-03", "type": "video/mp4"}, {"name": "2 vor san..mp4", "url": "", "date": "2025-12-03", "type": "video/mp4"}], "dates": ["2025-12-03"], "isSaniert": false}, "0,80m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "23,70m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}}}}}, "55098 Datteln": {"stutzenSaniert": 1, "klinerSaniert": 0, "streets": {"Neuer Weg": {"S65.09": {"11,10m Stutzen": {"files": [{"name": "1 vor san..mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}, {"name": "2 nach verschlie\u00dfen .mp4", "url": "", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": true}}}}}}, "stats": {"stutzen": 3, "kliner": 0, "totalProjects": 2, "gesamtSaniert": 6}};
-        // -------------------------------
+        // --- DATEN HIER ---
+        const ALL_SYSTEMS = {"Roboter 3": {"password": "123456", "last_update": "12.12.2025 23:59", "data": {"projects": {"55104 Dorsten": {"stutzenSaniert": 2, "klinerSaniert": 0, "streets": {"Mittelstra\u00dfe": {"2123 - 2122": {"ges. Haltung": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-01", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "date": "2025-12-02", "type": "video/mp4"}], "dates": ["2025-12-01", "2025-12-02"], "isSaniert": false}, "17,00m Muffe": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-02", "type": "video/mp4"}, {"name": "2 nach verschlie\u00dfen .mp4", "date": "2025-12-02", "type": "video/mp4"}], "dates": ["2025-12-02"], "isSaniert": true}, "19,10m Muffe": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-02", "type": "video/mp4"}, {"name": "2 nach verschlie\u00dfen .mp4", "date": "2025-12-02", "type": "video/mp4"}], "dates": ["2025-12-02"], "isSaniert": true}, "26,20m Muffe": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-02", "type": "video/mp4"}, {"name": "2 nach verschlie\u00dfen .mp4", "date": "2025-12-02", "type": "video/mp4"}], "dates": ["2025-12-02"], "isSaniert": true}, "12,20m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "date": "2025-12-04", "type": "video/mp4"}, {"name": "2 nach san..mp4", "date": "2025-12-12", "type": "video/mp4"}], "dates": ["2025-12-04", "2025-12-12"], "isSaniert": true}, "15,60m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "16,80m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "25,80m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "3,30m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "31,90m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}}, "4119 - 2123": {"18,40m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-01", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "date": "2025-12-01", "type": "video/mp4"}, {"name": "3 nach \u00f6ffnen.mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-01", "2025-12-04"], "isSaniert": false}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-01", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "date": "2025-12-01", "type": "video/mp4"}], "dates": ["2025-12-01"], "isSaniert": false}, "12,90m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "21,80m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "34,10m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "35,00m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen.mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}}, "2121 - 2160": {"8,30m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-03", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "date": "2025-12-03", "type": "video/mp4"}, {"name": "3 nach san..mp4", "date": "2025-12-03", "type": "video/mp4"}, {"name": "4 nach Nacharbeit.mp4", "date": "2025-12-03", "type": "video/mp4"}, {"name": "5 nach \u00f6ffnen.mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-03", "2025-12-04"], "isSaniert": true}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-03", "type": "video/mp4"}], "dates": ["2025-12-03"], "isSaniert": false}, "28,20m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}}, "2122 - 2121": {"17,20m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-03", "type": "video/mp4"}, {"name": "2 nach fr\u00e4sen.mp4", "date": "2025-12-03", "type": "video/mp4"}, {"name": "3 nach \u00f6ffnen.mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-03", "2025-12-04"], "isSaniert": false}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-03", "type": "video/mp4"}, {"name": "2 vor san..mp4", "date": "2025-12-03", "type": "video/mp4"}], "dates": ["2025-12-03"], "isSaniert": false}, "0,80m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}, "23,70m Stutzen": {"files": [{"name": "1 nach \u00f6ffnen .mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": false}}}}}, "55098 Datteln": {"stutzenSaniert": 1, "klinerSaniert": 0, "streets": {"Neuer Weg": {"S65.09": {"11,10m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-04", "type": "video/mp4"}, {"name": "2 nach verschlie\u00dfen .mp4", "date": "2025-12-04", "type": "video/mp4"}], "dates": ["2025-12-04"], "isSaniert": true}}}}}}, "stats": {"stutzen": 3, "kliner": 0, "totalProjects": 2, "gesamtSaniert": 6}}}}; // DATA_END
+        // ------------------
 
+        const sysSelect = document.getElementById('system-select');
+        const passInput = document.getElementById('password-input');
+        
         document.addEventListener('DOMContentLoaded', () => {
-            if (PROJECT_DATA) {
-                document.getElementById('timestamp').innerText = "Stand: " + new Date().toLocaleString();
-                updateDashboard(PROJECT_DATA.stats);
-                renderProjects(PROJECT_DATA.projects);
-            } else {
-                document.getElementById('results-container').innerHTML = '<p class="text-center text-red-500">Keine Daten injiziert.</p>';
+            if (!ALL_SYSTEMS) {
+                // Dummy für leeres Template (damit man nicht feststeckt)
+                sysSelect.innerHTML = "<option>Keine Daten</option>";
+                return;
+            }
+
+            // Selectbox füllen
+            sysSelect.innerHTML = "";
+            Object.keys(ALL_SYSTEMS).forEach(sysName => {
+                const opt = document.createElement('option');
+                opt.value = sysName;
+                opt.innerText = sysName;
+                sysSelect.appendChild(opt);
+            });
+
+            // Auto-Login Check
+            const savedSys = localStorage.getItem('ditom_sys');
+            const savedPass = localStorage.getItem('ditom_pass');
+            if(savedSys && savedPass && ALL_SYSTEMS[savedSys]) {
+                sysSelect.value = savedSys;
+                passInput.value = savedPass;
+                attemptLogin();
             }
         });
 
-        function updateDashboard(stats) {
-            if(!stats) return;
-            document.getElementById('stutzen-count').textContent = stats.stutzen || 0;
-            document.getElementById('kliner-count').textContent = stats.kliner || 0;
-            document.getElementById('total-projects-count').textContent = stats.totalProjects || 0;
-            document.getElementById('total-sanierungen-count').textContent = stats.gesamtSaniert || 0;
+        function attemptLogin() {
+            const sys = sysSelect.value;
+            const pass = passInput.value;
+            
+            if (ALL_SYSTEMS[sys] && String(ALL_SYSTEMS[sys].password) === String(pass)) {
+                // Erfolg
+                if(document.getElementById('remember-me').checked) {
+                    localStorage.setItem('ditom_sys', sys);
+                    localStorage.setItem('ditom_pass', pass);
+                }
+                loadSystemData(sys);
+                document.getElementById('login-modal').classList.add('hide');
+                document.getElementById('app-content').classList.remove('hide');
+            } else {
+                document.getElementById('error-msg').classList.remove('hide');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('ditom_sys');
+            localStorage.removeItem('ditom_pass');
+            location.reload();
+        }
+
+        function loadSystemData(sysName) {
+            const sysData = ALL_SYSTEMS[sysName];
+            const stats = sysData.data.stats;
+            const projects = sysData.data.projects;
+
+            document.getElementById('header-title').innerText = sysName;
+            document.getElementById('last-update').innerText = "Stand: " + sysData.last_update;
+
+            document.getElementById('count-stz').innerText = stats.stutzen;
+            document.getElementById('count-kl').innerText = stats.kliner;
+            document.getElementById('count-proj').innerText = stats.totalProjects;
+            document.getElementById('count-all').innerText = stats.gesamtSaniert;
+
+            renderProjects(projects);
         }
 
         function renderProjects(projects) {
             const container = document.getElementById('results-container');
             container.innerHTML = '';
             
-            Object.keys(projects).sort().forEach(projectName => {
-                const pData = projects[projectName];
-                const subtitle = `STZ: ${pData.stutzenSaniert} | KL: ${pData.klinerSaniert}`;
-                const pElem = createDetails(projectName, 0, 'blue', subtitle);
+            Object.keys(projects).sort().forEach(pName => {
+                const pData = projects[pName];
+                const pElem = createDetails(pName, 0, 'blue', `STZ: ${pData.stutzenSaniert}`);
                 
-                Object.keys(pData.streets).sort().forEach(streetName => {
-                    const sElem = createDetails(streetName, 1, 'teal');
-                    const ids = pData.streets[streetName];
-                    
-                    Object.keys(ids).sort().forEach(idName => {
-                        const iElem = createDetails(idName, 2, 'sky');
-                        const dmgs = ids[idName];
-                        
-                        Object.keys(dmgs).sort().forEach(dmgName => {
-                            const dData = dmgs[dmgName];
-                            const dColor = dData.isSaniert ? 'green' : 'amber';
-                            const dElem = createDetails(dmgName, 3, dColor, dData.dates.join(', '));
+                Object.keys(pData.streets).sort().forEach(sName => {
+                    const sElem = createDetails(sName, 1, 'teal');
+                    const ids = pData.streets[sName];
+                    Object.keys(ids).sort().forEach(iName => {
+                        const iElem = createDetails(iName, 2, 'sky');
+                        const dmgs = ids[iName];
+                        Object.keys(dmgs).sort().forEach(dName => {
+                            const dData = dmgs[dName];
+                            const color = dData.isSaniert ? 'green' : 'amber';
+                            const dElem = createDetails(dName, 3, color, dData.dates.join(', '));
                             
+                            // Files
                             const ul = document.createElement('ul');
-                            ul.className = 'pl-4 pt-2 space-y-2';
-                            
+                            ul.className = "pl-4 pt-2 space-y-2";
                             dData.files.forEach(f => {
                                 const li = document.createElement('li');
-                                li.className = 'flex items-center p-2 bg-gray-800 rounded border border-gray-700';
-                                li.innerHTML = `
-                                    <span class="text-gray-400 mr-2">${f.type.includes('video') ? '🎥' : '📷'}</span>
-                                    <span class="text-gray-200 text-sm truncate flex-1">${f.name}</span>
-                                    <span class="text-xs text-gray-500 ml-2">${f.date}</span>
-                                `;
+                                li.className = "p-2 bg-gray-800 rounded border border-gray-700 flex justify-between";
+                                li.innerHTML = `<span class="text-gray-300 text-sm">${f.name}</span><span class="text-gray-500 text-xs">${f.date}</span>`;
                                 ul.appendChild(li);
                             });
-                            
                             dElem.appendChild(ul);
                             iElem.appendChild(dElem);
                         });
@@ -117,12 +191,13 @@
 
         function createDetails(title, level, color, sub = '') {
             const d = document.createElement('details');
-            d.className = 'bg-gray-800/40 rounded-lg mb-2 border border-gray-700/50';
+            d.className = 'bg-gray-800/50 rounded mb-2 border border-gray-700';
             if(level > 0) d.style.marginLeft = (level * 1) + 'rem';
             
             const s = document.createElement('summary');
-            s.className = `p-3 cursor-pointer flex justify-between items-center text-white hover:bg-gray-700/50 rounded-lg`;
-            s.innerHTML = `<div class="flex items-center gap-2"><span class="text-${color}-400 font-bold">📂</span><span class="font-medium">${title}</span></div>${sub ? `<span class="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">${sub}</span>` : ''}`;
+            s.className = `p-3 text-white hover:bg-gray-700 flex justify-between cursor-pointer`;
+            s.innerHTML = `<span class="font-bold text-${color}-400">${title}</span> <span class="text-xs text-gray-400">${sub}</span>`;
+            
             d.appendChild(s);
             return d;
         }
