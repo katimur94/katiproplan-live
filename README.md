@@ -1,109 +1,98 @@
-# katiproplan-live
-Downloadlink = https://mega.nz/folder/n1xRCCoA#NAjfiX7FBTSVjVJli2ouAw
----
+🤖 DiTom Site Manager v50 "Total Swarm"
+![alt text](https://img.shields.io/badge/Platform-Windows-blue)
 
-# 🏗️ Präsentation: DiTom Site Manager v30.0
-**Untertitel:** Digitalisierung & Automatisierung der Kanalsanierungs-Dokumentation
+![alt text](https://img.shields.io/badge/Language-Python_3.12-yellow)
 
----
+![alt text](https://img.shields.io/badge/GUI-CustomTkinter-green)
 
-## 📌 Folie 1: Die Ausgangslage (Das Problem)
-*   **Chaos im Dateisystem:** Manuelle Ordnerstruktur führt zu Fehlern (z.B. "Hauptstr." vs. "Hauptstraße").
-*   **Zeitverlust:** Tägliches manuelles Umbenennen von Videos ("Teil 1", "Teil 2") kostet wertvolle Arbeitszeit.
-*   **Mangelnde Übersicht:** Keiner weiß, was der andere Roboter gerade macht oder wo er letzte Woche war.
-*   **Daten-Silo:** Tagesberichte liegen lokal auf dem Laptop. Das Büro hat keinen sofortigen Zugriff.
-
----
-
-## 🚀 Folie 2: Die Lösung – DiTom Site Manager
-Eine maßgeschneiderte Software-Lösung, die als zentrale Steuereinheit auf jedem Fahrzeug-Laptop läuft.
-
-*   **Standardisierung:** Erzwingt eine einheitliche Ordnerstruktur nach DIN/Firmenvorgabe.
-*   **Automatisierung:** Erkennt alte Dateien und nummeriert neue Videos/Berichte automatisch fortlaufend.
-*   **Synchronisation:** Verbindet alle Fahrzeuge über eine Cloud-Schnittstelle mit dem Büro (Live-Dashboard).
-
----
-
-## 🛠️ Folie 3: Kern-Funktionen (Was kann es?)
-
-### 1. Der "Sherlock Holmes" Scanner 🔍
-Das Programm weiß alles. Wenn man heute an einer Haltung arbeitet, scannt es das gesamte Laufwerk nach **vergangenen Arbeiten** an dieser Stelle.
-*   *Beispiel:* Letzte Woche wurde "Video Teil 1" gemacht. Das Programm benennt das heutige Video automatisch in "Video Teil 2" um.
-
-### 2. Intelligentes Dashboard 🌳
-Ein Explorer-Baum, der nicht nur Ordner anzeigt, sondern logisch sortiert:
-*   Projekt -> Datum -> Straße -> Haltung -> Schaden.
-*   **Neu in v30:** Tiefe Einsicht bis zur einzelnen Datei, direktes Umbenennen und Löschen per Rechtsklick.
-
-### 3. Büro-Automatik 📄
-*   **Excel:** Kopiert die Firmen-Vorlage und benennt sie korrekt nach der Haltung.
-*   **Tagesbericht:** Erstellt auf Knopfdruck eine HTML-Übersicht für Bauleiter/Kunden.
-
----
-
-## ☁️ Folie 4: Das Multi-User Cloud System (Highlight)
-Das Herzstück der Version 30.0.
-
-*   **Jeder Roboter ist ein Profil:** In den Einstellungen wird der Name (z.B. "Roboter 1") und ein Passwort vergeben.
-*   **Intelligenter Merge:** Wenn Roboter 1 seine Daten hochlädt, **überschreibt** er nicht die Daten von Roboter 2. Das System lädt die aktuelle Datenbank, fügt seine Daten hinzu und speichert alles ab.
-*   **Web-Ansicht:** Eine passwortgeschützte Webseite zeigt dem Büro **alle** Projekte **aller** Fahrzeuge in Echtzeit.
-
----
-
-## ⭐ Folie 5: Was ist neu in Version 30.0?
-Das "Usability Update":
-
-1.  **Deep Search & Auto-Expand:** Suchst du nach "S100", öffnet sich der Baum automatisch an genau der richtigen Stelle.
-2.  **Full Control:** Ordner und Projekte können direkt im Dashboard umbenannt oder gelöscht werden.
-3.  **Sicherheitsnetz:** "Soft Delete" (Ausblenden) vs. "Hard Delete" (Löschen) verhindert Datenverlust.
-4.  **Performance:** Der Scanner läuft im Hintergrund (Threading), damit das Programm auch bei 100.000 Dateien nicht einfriert.
-
----
-
-## 🔮 Folie 6: Ausblick (Roadmap)
-Was könnte man in Zukunft noch einbauen?
-
-*   **KI-Schadenserkennung:** Automatische Analyse der Fotos (Riss, Scherbe) durch KI.
-*   **Karten-Integration:** Anzeige der Haltungen auf einer Google Maps Karte.
-*   **PDF-Engine:** Generierung von fertigen PDF-Berichten direkt aus der Software (statt HTML).
-*   **Material-Erfassung:** Eingabe von verbrauchtem Harz/Liner direkt im Tool für die Abrechnung.
-
----
-
-# 📘 Technische Dokumentation (Code-Erklärung)
-
-Hier erkläre ich dir die wichtigsten Bausteine des Codes, damit du Fragen dazu beantworten kannst.
-
-### 1. Architektur & Bibliotheken
-*   **`customtkinter`:** Sorgt für das moderne, dunkle Design (sieht nicht aus wie Windows 95).
-*   **`os` & `shutil`:** Die "Hände" des Programms. Sie erstellen Ordner, verschieben Dateien und benennen um.
-*   **`threading`:** Das "Gehirn-Management". Es sorgt dafür, dass schwere Aufgaben (Laufwerk scannen, Upload) im Hintergrund laufen, während die Oberfläche bedienbar bleibt.
-*   **`requests` & `base64`:** Die "Telefonleitung" zu GitHub.
-
-### 2. Der "Intelligente Scanner" (`generate_export_json`)
-Dies ist der komplexeste Teil.
-*   **Funktion:** Er nutzt `os.walk`, um jeden Winkel der Festplatte zu durchsuchen.
-*   **Der Filter:** Er schaut sich den Pfad an: `Basis / Jahr / KW / Datum / ...`.
-*   **Der Trick:** Er prüft mit `datetime.strptime`, ob der Ordnername wirklich ein Datum (YYYY-MM-DD) ist. Wenn nicht (z.B. ein Systemordner wie `.git` oder `bin`), ignoriert er den ganzen Ast sofort. Das macht ihn extrem schnell und präzise.
-
-### 3. Die GitHub-Bridge (`run_github_logic`)
-Hier passiert die Magie der Synchronisation ohne Datenbank-Server.
-1.  **Download:** Lädt die aktuelle `index.html` von GitHub herunter.
-2.  **Extraktion:** Sucht im HTML-Code nach den Markern `/*JSON_START*/` und `/*JSON_END*/`. Alles dazwischen ist die aktuelle Datenbank aller Roboter.
-3.  **Merge:** Nimmt die extrahierte Datenbank und aktualisiert **nur** den Eintrag für den eigenen Roboter (z.B. "Roboter 2"). Roboter 1 bleibt unberührt.
-4.  **Injection:** Schreibt das neue JSON wieder zwischen die Marker in die lokale `template.html`.
-5.  **Upload:** Sendet die neue HTML-Datei zurück an GitHub. Netlify erkennt die Änderung und aktualisiert die Webseite sofort.
-
-### 4. Das Dashboard (`filter_tree`)
-*   Baut den Baum (`Treeview`) dynamisch auf.
-*   Nutzt Rekursion, um Projekt -> Datum -> Straße -> Haltung -> Datei darzustellen.
-*   Die **Suchfunktion** filtert diesen Baum in Echtzeit und setzt das `open=True` Flag, damit gefundene Elemente sofort sichtbar aufgeklappt werden.
-
-### 5. Datensicherheit (`save_config`)
-*   Das Programm prüft mit `sys.frozen`, ob es als `.exe` läuft.
-*   Es speichert die `ditom_config.json` immer direkt neben der `.exe`. So gehen Einstellungen auch bei einem Update oder PC-Wechsel nicht verloren, solange man den Ordner kopiert.
-
----
-
-### Zusammenfassung für den Chef:
-> *"Wir haben hier nicht nur ein Datei-Tool gebaut, sondern eine **dezentrale Cloud-Plattform**. Wir nutzen die Sicherheit und Infrastruktur von GitHub (Microsoft), ohne eigene Server betreiben zu müssen. Das spart uns monatliche Hosting-Kosten und Wartungsaufwand, während wir gleichzeitig eine professionelle Dokumentation sicherstellen."*
+![alt text](https://img.shields.io/badge/Architecture-Serverless%20Swarm-purple)
+Dezentrales Baustellen-Management & Dokumentations-System für Kanalsanierungs-Roboter.
+Der DiTom Site Manager ist eine spezialisierte Desktop-Applikation, die entwickelt wurde, um die Dokumentation (Videos, Aufmaße, Berichte) auf Baustellen zu automatisieren und zwischen mehreren Anlagen (Robotern) zu synchronisieren – ohne einen zentralen Server zu benötigen.
+🚀 Features
+🧠 Live Swarm Intelligence
+Dezentrale Synchronisation: Nutzt GitHub als "Datenbank". Kein SQL-Server oder AWS nötig.
+Globaler Status: Jeder Roboter sieht den Fortschritt aller anderen Anlagen (welche Haltung wurde bearbeitet? Welche Videos existieren schon?).
+Konfliktvermeidung: Das System prüft vor dem Erstellen neuer Dateien (z.B. "Video Nr. 3"), ob ein Kollege diese Nummer bereits vergeben hat, selbst wenn die Datei lokal noch nicht existiert.
+⚡ Smart Automation
+Intelligente Dateibenennung: Automatische Benennung von Videos und Excel-Dateien basierend auf dem Projektstatus (z.B. 3 nach san.mp4 oder Aufmaß Teil 2.xlsx).
+Auto-Folder-Structure: Erstellt automatisch die korrekte Verzeichnisstruktur nach DIN/Firmenstandard (Jahr > KW > Datum > Projekt > Straße > Haltung).
+Ghost Data: Importiert Ordnerstrukturen von Kollegen per Mausklick, ohne Gigabytes an Videodaten herunterladen zu müssen.
+🎥 Media & OBS Integration
+OBS Studio Overlay: Schreibt Live-Daten (Straße, Haltung, DN) in eine obs_live.txt, die direkt als Textquelle in OBS eingebunden werden kann.
+Drag & Drop Work: Einfaches Zuweisen von Aufnahmen zu Haltungen.
+🎨 Modern UI
+Bio-Neural Dark Mode: Augenfreundliches Interface für dunkle Arbeitsumgebungen (Regiewagen).
+Touch-Optimiert: Große Buttons für Bedienung auf Touchscreens.
+Taskbar Integration: Korrektes Verhalten als Windows-Applikation (Minimieren/Maximieren).
+🛠️ Technische Architektur
+Das System verfolgt einen Local-First Ansatz mit einer Serverless-Cloud-Komponente:
+Lokal: Alle "schweren" Daten (Videos, Bilder) bleiben lokal auf dem Rechner des Roboters.
+Cloud (GitHub API): Metadaten (Ordnerstrukturen, Dateinamen, Fortschritt) werden in einem JSON-Objekt gespeichert, das in eine index.html injiziert wird.
+Sync: Beim Start und auf Knopfdruck lädt der Client den "World State" herunter.
+Vorteil: 0€ Hosting-Kosten, funktioniert offline, volle Datenhoheit.
+Visualisierung: Die index.html dient gleichzeitig als Web-Dashboard für Bauleiter/Kunden.
+📦 Installation & Setup
+Voraussetzungen
+Windows 10/11
+Python 3.10+ (für Entwickler)
+Git
+Für Entwickler (Source Code)
+Repository klonen:
+code
+Bash
+git clone https://github.com/DEIN_USER/katiproplan-live.git
+cd katiproplan-live
+Abhängigkeiten installieren:
+code
+Bash
+pip install customtkinter requests packaging pyinstaller
+Konfiguration:
+Erstelle eine ditom_config.json (wird beim ersten Start automatisch erstellt) oder nutze das Settings-Menü in der App, um deinen GitHub Token und Anlagennamen einzutragen.
+Starten:
+code
+Bash
+python ditom_manager.py
+Als EXE kompilieren (Build)
+Da CustomTkinter spezielle Asset-Dateien benötigt, nutze das beiliegende Build-Skript:
+Führe das Build-Skript aus:
+code
+Bash
+python build_exe.py
+Die fertige .exe befindet sich im Ordner dist/.
+WICHTIG: Kopiere folgende Dateien manuell in den dist/ Ordner zur .exe:
+roboter.ico
+template.html
+📖 Bedienungsanleitung
+1. Projekt Starten
+Gib im Dashboard Projekt-Nr und Stadt ein.
+Klicke auf AUSFÜHREN. Der Tagesordner wird automatisch erstellt.
+2. Arbeiten (Lokal)
+Wähle im Reiter "BEARBEITUNG" die Straße und Haltung.
+Erstelle Ordner für Schäden (z.B. "Stutzen", "Riss") über die Buttons.
+Drücke REC (startet Simulation/Kopie), um ein Video zu speichern. Das System wählt automatisch die nächste freie Nummer.
+3. Cloud Sync (Swarm)
+Gehe auf "ÜBERSICHT" -> "CLOUD SWARM".
+Klicke CLOUD SYNC. Deine Fortschritte werden hochgeladen, Fortschritte der Kollegen werden heruntergeladen.
+Import: Siehst du ein Projekt eines Kollegen (Blau markiert)? Doppelklick auf eine Haltung importiert dessen Struktur zu dir ("Ghost Mode"), damit du nahtlos weiterarbeiten kannst.
+4. OBS Einbindung
+Füge in OBS eine "Text (GDI+)" Quelle hinzu.
+Wähle "Aus Datei lesen" und verweise auf die obs_live.txt im Programmordner.
+Die Einblendung aktualisiert sich automatisch, wenn du die Haltung wechselst.
+📂 Dateistruktur
+code
+Text
+/
+├── ditom_manager.py       # Hauptanwendung
+├── build_exe.py           # PyInstaller Skript
+├── template.html          # Web-Dashboard Vorlage
+├── roboter.ico            # App Icon
+├── ditom_config.json      # Lokale Einstellungen (Ignored by Git)
+├── ditom_cloud_state.json # Cache des Schwarm-Wissens
+└── obs_live.txt           # Output für OBS Studio
+⚠️ Bekannte Hinweise
+GitHub Token: Das Token wird lokal in der ditom_config.json gespeichert. Gib diese Datei nicht weiter!
+Konflikte: Wenn zwei Roboter exakt zur gleichen Sekunde syncen, gewinnt der letzte. Dank "Optimistic Locking" (SHA-Check) warnt das System jedoch meistens vor Konflikten.
+📝 Lizenz
+Dieses Projekt ist proprietäre Software für den internen Gebrauch.
+Copyright © 2024-2026 - DiTom Site Manager Team.
+Made with 🐍 Python & CustomTkinter.
