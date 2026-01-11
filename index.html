@@ -1,1 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KaTiProPlan - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #111827; color: white; }
+        /* Modal für Login */
+        #login-modal {
+            position: fixed; inset: 0; background: #000; z-index: 50;
+            display: flex; justify-content: center; align-items: center;
+        }
+        details > summary { list-style: none; cursor: pointer; }
+        details > summary::before { content: '►'; margin-right: 10px; color: gray; }
+        details[open] > summary::before { transform: rotate(90deg); color: #60A5FA; }
+        .hide { display: none !important; }
+    </style>
+</head>
+<body>
 
+    <!-- LOGIN SCREEN -->
+    <div id="login-modal">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700 text-center">
+            <h1 class="text-3xl font-bold mb-2">KaTiProPlan</h1>
+            <p class="text-gray-400 mb-6">Bitte System wählen</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-left text-sm text-gray-400 mb-1">Anlage / Roboter</label>
+                    <select id="system-select" class="w-full p-3 bg-gray-900 border border-gray-600 rounded text-white focus:border-blue-500 outline-none">
+                        <!-- Wird per JS gefüllt -->
+                        <option value="">Lade Systeme...</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-left text-sm text-gray-400 mb-1">Passwort</label>
+                    <input type="password" id="password-input" class="w-full p-3 bg-gray-900 border border-gray-600 rounded text-white focus:border-blue-500 outline-none" placeholder="******">
+                </div>
+
+                <div class="flex items-center justify-between text-sm text-gray-400">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" id="remember-me" class="mr-2 rounded bg-gray-700"> Merken
+                    </label>
+                </div>
+
+                <button onclick="attemptLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded transition">
+                    Einloggen
+                </button>
+                <p id="error-msg" class="text-red-500 mt-2 text-sm hide">Falsches Passwort!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP (Versteckt bis Login) -->
+    <div id="app-content" class="min-h-screen container mx-auto p-4 hide">
+        <header class="text-center mb-8 pt-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-extrabold" id="header-title">Projekt Übersicht</h1>
+                <p class="text-gray-400 text-xs" id="last-update"></p>
+            </div>
+            <button onclick="logout()" class="text-sm text-red-400 border border-red-400 px-3 py-1 rounded hover:bg-red-900">Logout</button>
+        </header>
+
+        <section class="mb-12 p-6 bg-gradient-to-r from-blue-900 to-gray-900 rounded-2xl shadow-lg border border-gray-700">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div><p class="text-blue-300 text-sm">Stutzen</p><p id="count-stz" class="text-3xl font-bold">0</p></div>
+                <div><p class="text-blue-300 text-sm">K-Liner</p><p id="count-kl" class="text-3xl font-bold">0</p></div>
+                <div><p class="text-blue-300 text-sm">Projekte</p><p id="count-proj" class="text-3xl font-bold">0</p></div>
+                <div><p class="text-blue-300 text-sm">Gesamt</p><p id="count-all" class="text-3xl font-bold">0</p></div>
+            </div>
+        </section>
+
+        <div id="results-container" class="space-y-4"></div>
+    </div>
+
+    <script>
+        // --- DATEN HIER ---
+        const ALL_SYSTEMS = /*JSON_START*/{"test 2": {"user": "test 2", "password": "1234", "last_update": "11.01 23:15", "data": {"projects": {"55555 Brilon": {"stutzenSaniert": 0, "klinerSaniert": 0, "streets": {"Itzelstein": {"4 - 5": {"12,30m Stutzen": {"files": [{"name": "4 nach fr\u00e4sen.mp4", "date": "2026-01-09"}], "dates": ["2025-12-19", "2026-01-09"], "isSaniert": false}, "\ud83d\udcc4 DOKUMENTE": {"files": [{"name": "Aufma\u00df Roboter 4 - 5.xlsx", "date": "2025-12-19"}, {"name": "Aufma\u00df Roboter 4 - 5 - Teil 2.xlsx", "date": "2026-01-09"}], "dates": ["2025-12-19", "2026-01-09"], "isSaniert": false}, "22,66m Stutzen": {"files": [{"name": "2 nach fr\u00e4sen.mp4", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": false}}}}}, "55221 Ahlen": {"stutzenSaniert": 0, "klinerSaniert": 0, "streets": {"L\u00fctkeweg": {"5521 - 5522": {"1,22m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": false}, "51,20m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": false}, "\ud83d\udcc4 DOKUMENTE": {"files": [{"name": "Aufma\u00df 5521 - 5522.xlsx", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": false}}, "5522 - 5523": {"ges. Haltung": {"files": [{"name": "2 nach fr\u00e4sen.mp4", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": false}}}}}, "55104 Dorsten": {"stutzenSaniert": 0, "klinerSaniert": 0, "streets": {"Mittelstra\u00dfe": {"2121 - 2160": {}, "2122 - 2121": {}}}}, "55098 Datteln": {"stutzenSaniert": 2, "klinerSaniert": 0, "streets": {"Morukstr": {"222 - 221": {"12,20m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-13"}], "dates": ["2025-12-13"], "isSaniert": false}}}, "Neuer Weg": {"S65.09": {"11,10m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-04"}, {"name": "2 nach verschlie\u00dfen .mp4", "date": "2025-12-04"}, {"name": "3 nach san..mp4", "date": "2025-12-13"}, {"name": "4 nach Nacharbeit.mp4", "date": "2025-12-13"}], "dates": ["2025-12-04", "2025-12-13"], "isSaniert": true}, "\ud83d\udcc4 DOKUMENTE": {"files": [{"name": "Aufma\u00df Roboter S65,09.xlsx", "date": "2025-12-04"}, {"name": "Aufma\u00df Roboter S65.09 - Teil 2.xlsx", "date": "2025-12-13"}], "dates": ["2025-12-04", "2025-12-13"], "isSaniert": false}}}, "Alter Weg": {"S65.11": {"82,20m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-13"}, {"name": "2 nach san..mp4", "date": "2025-12-13"}], "dates": ["2025-12-13"], "isSaniert": true}}}}}}, "stats": {"stutzen": 2, "kliner": 0, "totalProjects": 4, "gesamtSaniert": 2}}}}/*JSON_END*/;
+        // ------------------
+
+        const sysSelect = document.getElementById('system-select');
+        const passInput = document.getElementById('password-input');
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!ALL_SYSTEMS) {
+                // Dummy für leeres Template (damit man nicht feststeckt)
+                sysSelect.innerHTML = "<option>Keine Daten</option>";
+                return;
+            }
+
+            // Selectbox füllen
+            sysSelect.innerHTML = "";
+            Object.keys(ALL_SYSTEMS).forEach(sysName => {
+                const opt = document.createElement('option');
+                opt.value = sysName;
+                opt.innerText = sysName;
+                sysSelect.appendChild(opt);
+            });
+
+            // Auto-Login Check
+            const savedSys = localStorage.getItem('ditom_sys');
+            const savedPass = localStorage.getItem('ditom_pass');
+            if(savedSys && savedPass && ALL_SYSTEMS[savedSys]) {
+                sysSelect.value = savedSys;
+                passInput.value = savedPass;
+                attemptLogin();
+            }
+        });
+
+        function attemptLogin() {
+            const sys = sysSelect.value;
+            const pass = passInput.value;
+            
+            if (ALL_SYSTEMS[sys] && String(ALL_SYSTEMS[sys].password) === String(pass)) {
+                // Erfolg
+                if(document.getElementById('remember-me').checked) {
+                    localStorage.setItem('ditom_sys', sys);
+                    localStorage.setItem('ditom_pass', pass);
+                }
+                loadSystemData(sys);
+                document.getElementById('login-modal').classList.add('hide');
+                document.getElementById('app-content').classList.remove('hide');
+            } else {
+                document.getElementById('error-msg').classList.remove('hide');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('ditom_sys');
+            localStorage.removeItem('ditom_pass');
+            location.reload();
+        }
+
+        function loadSystemData(sysName) {
+            const sysData = ALL_SYSTEMS[sysName];
+            const stats = sysData.data.stats;
+            const projects = sysData.data.projects;
+
+            document.getElementById('header-title').innerText = sysName;
+            document.getElementById('last-update').innerText = "Stand: " + sysData.last_update;
+
+            document.getElementById('count-stz').innerText = stats.stutzen;
+            document.getElementById('count-kl').innerText = stats.kliner;
+            document.getElementById('count-proj').innerText = stats.totalProjects;
+            document.getElementById('count-all').innerText = stats.gesamtSaniert;
+
+            renderProjects(projects);
+        }
+
+        function renderProjects(projects) {
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+            
+            Object.keys(projects).sort().forEach(pName => {
+                const pData = projects[pName];
+                const pElem = createDetails(pName, 0, 'blue', `STZ: ${pData.stutzenSaniert}`);
+                
+                Object.keys(pData.streets).sort().forEach(sName => {
+                    const sElem = createDetails(sName, 1, 'teal');
+                    const ids = pData.streets[sName];
+                    Object.keys(ids).sort().forEach(iName => {
+                        const iElem = createDetails(iName, 2, 'sky');
+                        const dmgs = ids[iName];
+                        Object.keys(dmgs).sort().forEach(dName => {
+                            const dData = dmgs[dName];
+                            const color = dData.isSaniert ? 'green' : 'amber';
+                            const dElem = createDetails(dName, 3, color, dData.dates.join(', '));
+                            
+                            // Files
+                            const ul = document.createElement('ul');
+                            ul.className = "pl-4 pt-2 space-y-2";
+                            dData.files.forEach(f => {
+                                const li = document.createElement('li');
+                                li.className = "p-2 bg-gray-800 rounded border border-gray-700 flex justify-between";
+                                li.innerHTML = `<span class="text-gray-300 text-sm">${f.name}</span><span class="text-gray-500 text-xs">${f.date}</span>`;
+                                ul.appendChild(li);
+                            });
+                            dElem.appendChild(ul);
+                            iElem.appendChild(dElem);
+                        });
+                        sElem.appendChild(iElem);
+                    });
+                    pElem.appendChild(sElem);
+                });
+                container.appendChild(pElem);
+            });
+        }
+
+        function createDetails(title, level, color, sub = '') {
+            const d = document.createElement('details');
+            d.className = 'bg-gray-800/50 rounded mb-2 border border-gray-700';
+            if(level > 0) d.style.marginLeft = (level * 1) + 'rem';
+            
+            const s = document.createElement('summary');
+            s.className = `p-3 text-white hover:bg-gray-700 flex justify-between cursor-pointer`;
+            s.innerHTML = `<span class="font-bold text-${color}-400">${title}</span> <span class="text-xs text-gray-400">${sub}</span>`;
+            
+            d.appendChild(s);
+            return d;
+        }
+    </script>
+</body>
+</html>
