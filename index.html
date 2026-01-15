@@ -1,1 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiTom Site Manager Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { bg: '#0f172a', card: '#1e293b', accent: '#38bdf8', text: '#f1f5f9', dim: '#94a3b8' } } }
+        }
+    </script>
+    <style>
+        body { background-color: #0f172a; color: #f1f5f9; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        details > summary { list-style: none; cursor: pointer; transition: 0.2s; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] > summary .rotate-icon { transform: rotate(90deg); color: #38bdf8; }
+        .glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .hide { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
 
+    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+        <div class="glass p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border-t-4 border-accent">
+            <h1 class="text-3xl font-bold tracking-wider mb-2">DITOM <span class="text-accent">CLOUD</span></h1>
+            <p class="text-dim text-sm mb-6">Site Manager v51 Web Access</p>
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="text-xs font-bold text-dim uppercase ml-1">System</label>
+                    <select id="system-select" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none focus:border-accent"><option>Lade...</option></select>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-dim uppercase ml-1">Passwort</label>
+                    <input type="password" id="password-input" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none focus:border-accent">
+                </div>
+                <button onclick="attemptLogin()" class="w-full bg-accent hover:bg-sky-400 text-slate-900 font-bold py-3 rounded-lg mt-2">LOGIN</button>
+                <p id="error-msg" class="text-red-400 text-sm mt-2 text-center hide">Zugriff verweigert</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-content" class="flex-1 flex flex-col hide">
+        <header class="glass sticky top-0 z-40 border-b border-slate-700">
+            <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-robot text-accent text-2xl"></i>
+                    <h1 class="font-bold text-lg">DITOM <span class="text-accent">SITE MANAGER</span></h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="last-update-time" class="text-xs font-mono text-emerald-400"></span>
+                    <button onclick="logout()" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-power-off"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container mx-auto p-4">
+            <div class="glass p-3 rounded-xl mb-6 flex flex-col md:flex-row gap-3 items-center sticky top-20 z-30 shadow-xl">
+                <div class="relative flex-1 w-full">
+                    <i class="fa-solid fa-search absolute left-3 top-3.5 text-gray-500"></i>
+                    <input type="text" id="search-input" onkeyup="filterData()" placeholder="Suche Projekt, Straße, Stutzen..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg pl-10 p-2.5 outline-none focus:border-accent">
+                </div>
+                <select id="year-filter" onchange="filterData()" class="bg-slate-900 border border-slate-700 text-white rounded-lg p-2.5 outline-none"><option value="all">📅 Alle Jahre</option></select>
+            </div>
+
+            <div id="results-container" class="space-y-3 pb-20"></div>
+        </div>
+    </div>
+
+    <script>
+        // DATEN INJECTION
+        const DATA_WRAPPER = /*JSON_START*/{"test 1": {"user": "test 1", "password": "1234", "last_update": "15.01 19:34", "data": {"projects": {"55104 Dorsten": {"stutzenSaniert": 1, "klinerSaniert": 0, "streets": {"Mittelstraße": {"2122 - 2121": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 2122 - 2121 - Teil 3.xlsx", "date": "2026-01-08"}, {"name": "Aufmaß Roboter 2122 - 2121.xlsx", "date": "2025-12-03"}, {"name": "Aufmaß Roboter 2122 - 2121 - Teil2.xlsx", "date": "2025-12-04"}], "dates": [], "isSaniert": false}, "0,80m Stutzen": {"files": [{"name": "2 nach Nacharbeit.mp4", "date": "2026-01-08"}, {"name": "3 nach öffnen.mp4", "date": "2026-01-08"}, {"name": "1 nach öffnen .mp4", "date": "2025-12-04"}], "dates": ["2026-01-08", "2025-12-04"], "isSaniert": false}, "17,20m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-03"}, {"name": "2 nach fräsen.mp4", "date": "2025-12-03"}, {"name": "3 nach öffnen.mp4", "date": "2025-12-04"}], "dates": ["2025-12-03", "2025-12-04"], "isSaniert": false}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-03"}, {"name": "2 vor san..mp4", "date": "2025-12-03"}], "dates": ["2025-12-03"], "isSaniert": false}, "23,70m Stutzen": {"files": [{"name": "1 nach öffnen .mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}}, "2123 - 2122": {"ges. Haltung": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-01"}, {"name": "2 nach fräsen.mp4", "date": "2025-12-02"}], "dates": ["2025-12-01", "2025-12-02"], "isSaniert": false}, "📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 2123 - 2122.xlsx", "date": "2025-12-02"}, {"name": "Aufmaß Roboter 2123 - 2122 - Teil2.xlsx", "date": "2025-12-04"}, {"name": "Aufmaß Roboter 2123 - 2122 - Teil 3.xlsx", "date": "2025-12-13"}], "dates": [], "isSaniert": false}, "17,00m Muffe": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-02"}, {"name": "2 nach verschließen .mp4", "date": "2025-12-02"}], "dates": ["2025-12-02"], "isSaniert": true}, "19,10m Muffe": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-02"}, {"name": "2 nach verschließen .mp4", "date": "2025-12-02"}], "dates": ["2025-12-02"], "isSaniert": true}, "26,20m Muffe": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-02"}, {"name": "2 nach verschließen .mp4", "date": "2025-12-02"}], "dates": ["2025-12-02"], "isSaniert": true}, "12,20m Stutzen": {"files": [{"name": "1 nach öffnen .mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}, "15,60m Stutzen": {"files": [{"name": "1 nach öffnen .mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}, "16,80m Stutzen": {"files": [{"name": "1 nach öffnen .mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}, "25,80m Stutzen": {"files": [{"name": "1 nach öffnen .mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}, "3,30m Stutzen": {"files": [{"name": "1 nach öffnen .mp4", "date": "2025-12-04"}, {"name": "2 nach Nacharbeit.mp4", "date": "2025-12-13"}], "dates": ["2025-12-04", "2025-12-13"], "isSaniert": false}, "31,90m Stutzen": {"files": [{"name": "1 nach öffnen.mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}}, "4119 - 2123": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 4119 - 2123.xlsx", "date": "2025-12-01"}, {"name": "Aufmaß Roboter 4119 - 2123 - Teil2.xlsx", "date": "2025-12-04"}, {"name": "Aufmaß Roboter 4119 - 2123 - Teil 2.xlsx", "date": "2025-12-18"}], "dates": [], "isSaniert": false}, "18,40m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-01"}, {"name": "2 nach fräsen.mp4", "date": "2025-12-01"}, {"name": "3 nach öffnen.mp4", "date": "2025-12-04"}], "dates": ["2025-12-01", "2025-12-04"], "isSaniert": false}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-01"}, {"name": "2 nach fräsen.mp4", "date": "2025-12-01"}], "dates": ["2025-12-01"], "isSaniert": false}, "12,90m Stutzen": {"files": [{"name": "1 nach öffnen.mp4", "date": "2025-12-04"}], "dates": ["2025-12-04", "2025-12-18"], "isSaniert": false}, "21,80m Stutzen": {"files": [{"name": "1 nach öffnen.mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}, "34,10m Stutzen": {"files": [{"name": "1 nach öffnen.mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}, "35,00m Stutzen": {"files": [{"name": "1 nach öffnen.mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}, "1,80m Stutzen": {"files": [], "dates": ["2025-12-18"], "isSaniert": false}}, "2121 - 2160": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 2121 - 2160.xlsx", "date": "2025-12-03"}, {"name": "Aufmaß Roboter 2121 - 2160 - Teil2.xlsx", "date": "2025-12-04"}, {"name": "Aufmaß Roboter 2121 - 2160 - Teil 3.xlsx", "date": "2025-12-18"}], "dates": [], "isSaniert": false}, "8,30m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-03"}, {"name": "2 nach fräsen.mp4", "date": "2025-12-03"}, {"name": "3 nach san..mp4", "date": "2025-12-03"}, {"name": "4 nach Nacharbeit.mp4", "date": "2025-12-03"}, {"name": "5 nach öffnen.mp4", "date": "2025-12-04"}], "dates": ["2025-12-03", "2025-12-04", "2025-12-18"], "isSaniert": true}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "date": "2025-12-03"}], "dates": ["2025-12-03"], "isSaniert": false}, "28,20m Stutzen": {"files": [{"name": "1 nach öffnen .mp4", "date": "2025-12-04"}], "dates": ["2025-12-04"], "isSaniert": false}}}}}, "5555 Berlin": {"stutzenSaniert": 0, "klinerSaniert": 0, "streets": {"Mattnerstr": {"2 - 3": {"16,30m Stutzen": {"files": [], "dates": ["2026-01-08"], "isSaniert": false}, "26,30m Stutzen": {"files": [{"name": "4 vor san..mp4", "date": "2026-01-08"}, {"name": "1 vor san..mp4", "date": "2025-12-18"}, {"name": "2 nach fräsen.mp4", "date": "2025-12-18"}], "dates": ["2026-01-08", "2025-12-18"], "isSaniert": false}}}}}, "55221 Ahlen": {"stutzenSaniert": 1, "klinerSaniert": 0, "streets": {"Lütkeweg": {"5521 - 5522": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 5521 - 5522 - Teil 1.xlsx", "date": "2026-01-09"}], "dates": [], "isSaniert": false}, "1,22m Stutzen": {"files": [{"name": "2 nach fräsen.mp4", "date": "2026-01-09"}, {"name": "3 vor san.jpg", "date": "2026-01-09"}, {"name": "4 nach verschließen.jpg", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": true}, "51,20m Stutzen": {"files": [{"name": "2 nach fräsen.mp4", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": false}}, "5522 - 5523": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 5522 - 5523 - Teil 1.xlsx", "date": "2026-01-09"}, {"name": "Aufmaß Roboter 5522 - 5523 - Teil 2.xlsx", "date": "2026-01-09"}], "dates": [], "isSaniert": false}, "ges. Haltung": {"files": [{"name": "1 vor san..mp4", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": false}}}, "Westfalendamm": {"6622 - 6623": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 6622 - 6623 - Teil 1.xlsx", "date": "2026-01-09"}], "dates": [], "isSaniert": false}, "ges. Haltung": {"files": [], "dates": ["2026-01-09"], "isSaniert": false}}}}}, "55555 Brilon": {"stutzenSaniert": 0, "klinerSaniert": 0, "streets": {"Itzelstein": {"4 - 5": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 4 - 5 - Teil 1.xlsx", "date": "2026-01-09"}], "dates": [], "isSaniert": false}, "12,30m Stutzen": {"files": [{"name": "3 nach öffnen.mp4", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": false}, "22,66m Stutzen": {"files": [{"name": "1 vor san..mp4", "date": "2026-01-09"}], "dates": ["2026-01-09"], "isSaniert": false}}}}}, "55098 Datteln": {"stutzenSaniert": 1, "klinerSaniert": 0, "streets": {"Neuer Weg": {"S65.09": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter S65.09 - Teil 3.xlsx", "date": "2026-01-12"}], "dates": [], "isSaniert": false}, "11,10m Stutzen": {"files": [{"name": "5 nach verschließen.jpg", "date": "2026-01-12"}], "dates": ["2026-01-12"], "isSaniert": true}}}}}, "78786 Hamm": {"stutzenSaniert": 0, "klinerSaniert": 0, "streets": {"Sonderweg": {"15152 - 15153": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 15152 - 15153 - Teil 2.xlsx", "date": "2026-01-12"}, {"name": "Aufmaß Roboter 15152 - 15153.xlsx", "date": "2026-01-12"}], "dates": [], "isSaniert": false}, "01,35m Stutzen": {"files": [{"name": "1 vor san.jpg", "date": "2026-01-12"}], "dates": ["2026-01-12"], "isSaniert": false}, "02,55m Riss": {"files": [{"name": "1 vor san.jpg", "date": "2026-01-12"}], "dates": ["2026-01-12"], "isSaniert": false}}}}}, "00000 Düsseldorf": {"stutzenSaniert": 1, "klinerSaniert": 0, "streets": {"Heilriegelstr": {"S34 - S43730033": {"3,50m Stutzen": {"files": [{"name": "3 nach verschließen.pdf", "date": "2026-01-15"}], "dates": ["2026-01-15"], "isSaniert": true}}}}}, "4444 Sachsen": {"stutzenSaniert": 0, "klinerSaniert": 0, "streets": {}}, "55102 Olfen": {"stutzenSaniert": 0, "klinerSaniert": 0, "streets": {"Südstraße": {"333 - 444": {"📄 DOKUMENTE": {"files": [{"name": "Aufmaß Roboter 333 - 444.xlsx", "date": "2025-12-17"}, {"name": "Aufmaß Roboter 333 - 444 - Teil 2.xlsx", "date": "2025-12-18"}], "dates": [], "isSaniert": false}, "20,20m Stutzen": {"files": [{"name": "2 nach Nacharbeit.jpg", "date": "2025-12-17"}], "dates": ["2025-12-17"], "isSaniert": false}, "28,00m Stutzen": {"files": [], "dates": ["2025-12-17", "2025-12-18"], "isSaniert": false}}}}}}, "stats": {"stutzen": 4, "kliner": 0, "totalProjects": 9, "gesamtSaniert": 7}}}}/*JSON_END*/;
+        let ALL_PROJECTS_FLAT = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const sel = document.getElementById('system-select');
+            sel.innerHTML = "";
+            if (Object.keys(DATA_WRAPPER).length === 0) sel.innerHTML = "<option>Keine Daten</option>";
+            Object.keys(DATA_WRAPPER).forEach(sys => {
+                const opt = document.createElement('option');
+                opt.value = sys; opt.innerText = sys; sel.appendChild(opt);
+            });
+            const s = localStorage.getItem('ditom_sys'), p = localStorage.getItem('ditom_pass');
+            if(s && p && DATA_WRAPPER[s]) { document.getElementById('system-select').value = s; document.getElementById('password-input').value = p; attemptLogin(); }
+        });
+
+        function attemptLogin() {
+            const sys = document.getElementById('system-select').value;
+            const pass = document.getElementById('password-input').value;
+            if (DATA_WRAPPER[sys] && String(DATA_WRAPPER[sys].password) === String(pass)) {
+                localStorage.setItem('ditom_sys', sys); localStorage.setItem('ditom_pass', pass);
+                initApp(sys);
+                document.getElementById('login-modal').classList.add('hide');
+                document.getElementById('app-content').classList.remove('hide');
+            } else document.getElementById('error-msg').classList.remove('hide');
+        }
+
+        function logout() { localStorage.clear(); location.reload(); }
+
+        function initApp(sysName) {
+            const data = DATA_WRAPPER[sysName];
+            document.getElementById('last-update-time').innerText = "Stand: " + data.last_update;
+            
+            // Daten flachklopfen für Suche
+            ALL_PROJECTS_FLAT = [];
+            const projs = data.data.projects || {};
+            Object.keys(projs).forEach(pName => {
+                const pData = projs[pName];
+                let maxDate = "0000-00-00";
+                // Datum suchen
+                try {
+                    Object.values(pData.streets).forEach(str => 
+                        Object.values(str).forEach(hal => 
+                            Object.values(hal).forEach(dmg => { if(dmg.dates) dmg.dates.forEach(d => {if(d>maxDate)maxDate=d}) })
+                        )
+                    );
+                } catch(e){}
+                ALL_PROJECTS_FLAT.push({ name: pName, data: pData, date: maxDate, searchStr: (pName + JSON.stringify(pData)).toLowerCase() });
+            });
+
+            // Jahre füllen
+            const years = new Set();
+            ALL_PROJECTS_FLAT.forEach(p => { if(p.date !== "0000-00-00") years.add(p.date.split('-')[0]); });
+            const ySel = document.getElementById('year-filter');
+            Array.from(years).sort().reverse().forEach(y => {
+                const opt = document.createElement('option'); opt.value = y; opt.innerText = "Jahr " + y; ySel.appendChild(opt);
+            });
+
+            renderList(ALL_PROJECTS_FLAT);
+        }
+
+        function filterData() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const year = document.getElementById('year-filter').value;
+            
+            const filtered = ALL_PROJECTS_FLAT.filter(p => {
+                if (search && !p.searchStr.includes(search)) return false;
+                if (year !== 'all' && !p.date.startsWith(year)) return false;
+                return true;
+            });
+            renderList(filtered);
+        }
+
+        function renderList(items) {
+            const con = document.getElementById('results-container'); con.innerHTML = '';
+            if (items.length === 0) { con.innerHTML = '<div class="text-center text-dim mt-10">Keine Ergebnisse</div>'; return; }
+
+            items.forEach(item => {
+                const card = document.createElement('details');
+                card.className = "glass rounded-xl overflow-hidden border-l-4 border-l-slate-600 group";
+                
+                const dateDisp = item.date !== "0000-00-00" ? item.date.split('-').reverse().join('.') : "";
+                
+                let html = '<div class="p-4 bg-slate-900/50 space-y-3 border-t border-slate-700">';
+                const streets = item.data.streets;
+                Object.keys(streets).sort().forEach(sName => {
+                    html += `<details class="pl-2 border-l border-slate-700 ml-1"><summary class="flex items-center gap-2 py-1 hover:text-accent"><i class="fa-solid fa-chevron-right rotate-icon text-xs"></i> <i class="fa-solid fa-road text-dim"></i> <b>${sName}</b></summary><div class="pl-6 mt-2 space-y-2">`;
+                    const haltungen = streets[sName];
+                    Object.keys(haltungen).sort().forEach(hName => {
+                        html += `<details><summary class="flex items-center gap-2 py-1 hover:text-white text-dim"><i class="fa-solid fa-chevron-right rotate-icon text-xs"></i> <i class="fa-solid fa-circle-notch text-xs"></i> ${hName}</summary><div class="pl-4 mt-2 grid gap-2">`;
+                        const damages = haltungen[hName];
+                        Object.keys(damages).sort().forEach(dName => {
+                            const dmg = damages[dName];
+                            const badge = dmg.isSaniert ? "border-emerald-500/50 text-emerald-400 bg-emerald-900/10" : "border-amber-500/50 text-amber-400 bg-amber-900/10";
+                            let files = "";
+                            dmg.files.forEach(f => files += `<div class="flex justify-between text-[10px] text-dim bg-black/20 p-1 px-2 rounded mt-1"><span>${f.name}</span><span>${f.date}</span></div>`);
+                            html += `<div class="p-2 rounded border ${badge} text-xs"><div class="font-bold uppercase mb-1 flex items-center gap-2"><i class="fa-solid fa-wrench"></i> ${dName}</div>${files}</div>`;
+                        });
+                        html += `</div></details>`;
+                    });
+                    html += `</div></details>`;
+                });
+                html += '</div>';
+
+                card.innerHTML = `<summary class="p-4 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800"><div class="flex items-center gap-3"><i class="fa-solid fa-chevron-right rotate-icon text-dim text-xs"></i><i class="fa-solid fa-folder text-accent text-xl"></i><div><h3 class="font-bold text-white">${item.name}</h3><div class="text-xs text-dim">${dateDisp} | ${item.data.stutzenSaniert} Stutzen</div></div></div></summary>${html}`;
+                con.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
