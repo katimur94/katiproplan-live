@@ -1,2 +1,64 @@
-🤖 DiTom Site Manager v53 "Total Swarm"Intelligente Baustellendokumentation & dezentrales Flottenmanagement für die moderne Kanalsanierung.Der DiTom Site Manager v53 ist eine spezialisierte Desktop-Applikation für Sanierungs-Operatoren. Er automatisiert den gesamten Dokumentations-Workflow vor Ort – von der Videoaufnahme über das Smart-Aufmaß bis hin zum Cloud-Sync – und ermöglicht eine serverlose Zusammenarbeit mehrerer Anlagen (Roboter) in Echtzeit.🚀 Key Features🧠 Swarm Intelligence (GitHub-Backend)Dezentraler Sync: Nutzt die GitHub API als hochverfügbaren Datenspeicher für Metadaten. Keine eigenen Server- oder Datenbankkosten (0€ Hosting).Globaler World-State: Jeder Roboter sieht in Echtzeit, welche Haltung ein Kollege bereits saniert hat, welche Videos existieren und welche Struktur bereits angelegt wurde.Ghost Data & Konfliktvermeidung: Importiere Ordnerstrukturen von Kollegen per Mausklick. Das System verhindert aktiv doppelte Dateinummerierungen, selbst wenn diese lokal noch gar nicht existieren.⚡ Smart Automation & WorkflowIntelligente Nummerierung: Erkennt automatisch die nächste Video-Nummer (z. B. 3 nach san.mp4) unter Berücksichtigung von lokalen und Cloud-Daten.Auto-Folder-Structure: Erstellt Verzeichnisstrukturen vollautomatisch nach Firmenstandard (Jahr > KW > Datum > Projekt > Straße > Haltung).Smart-Aufmaß: Erkennt bestehende Excel-Aufmaße und generiert fortlaufende Teil-Aufmaße (z. B. Teil 4 -> Teil 5) basierend auf deinen Vorlagen.🎥 Media & OBS IntegrationOBS Live-Overlay: Schreibt aktuelle Projektdaten (Straße, Haltung, DN) in eine obs_live.txt. Diese kann in OBS Studio als GDI+ Textquelle eingebunden werden.HTML-Reporting: Erstellt auf Knopfdruck digitale Tagesberichte inklusive Medienübersicht und Dateigrößen.🛠 Das System im Detail1. Performance Cockpit (Dashboard)Das Herzstück der Anwendung zur Kontrolle der Tagesleistung und des Cloud-Status.Live-Gauges: Visualisierung der sanierten Stutzen und Projekte.Schnellsuche: Durchsuche tausende lokale Projekte in Millisekunden.2. Operationeller ArbeitsmodusOptimiert für die schnelle Bedienung im Sanierungswagen.Maßnahmen-Buttons: Erstelle Schadensordner (Stutzen, Liner, Riss) mit vordefinierten Kürzeln.Historie: Blaue Einträge zeigen Daten von Kollegen aus der Cloud. Grüne Einträge sind lokal vorhanden.3. Smart-Dokumentation & ToolsAutomatisierung von Büroaufgaben direkt im Einsatzfahrzeug.Automatisches Aufmaß: Erkennt vorhandene Aufmaße und erstellt das nächste Teilaufmaß in Excel.Tagesberichte: Generiert sofort druckreife HTML-Übersichten für die Bauleitung.4. Cloud Swarm SynchronisationNahtloser Abgleich aller Einheiten im Schwarm über das dezentrale Backend.5. Konfiguration & PersonalisierungAnpassung der System-DNA an die Hardware und Lichtverhältnisse vor Ort.Design-Engine: 10 professionelle Themes (z. B. "Bio-Neural" oder "Corporate Dark") zur Reduzierung der Blendwirkung im Regiewagen.🛠️ Technische ArchitekturDas System verfolgt einen Local-First Ansatz:Lokal: Große Mediendaten (Videos, Bilder) verbleiben auf der lokalen Festplatte.Cloud: Nur Metadaten (JSON-Strukturen) werden synchronisiert (Datenvolumen-schonend).Web-Interface: Das Backend injiziert Daten in eine index.html für externe Dashboards.📦 Build & DeploymentVoraussetzungenWindows 10/11Python 3.12+EXE erstellenNutze den --onedir Modus für maximale Stabilität:python build_exe.py
-Wichtig: Der Ordner _internal muss zusammen mit der .exe ausgeliefert werden.📝 Lizenz & CopyrightDieses Projekt ist proprietäre Software.Entwickelt von Timur KalayciCopyright © 2024-2026 - DiTom Site Manager Team.Präzision im Schacht, Ordnung im System.
+# 🤖 DiTom Site Manager v53 "Total Swarm"
+
+![Platform](https://img.shields.io/badge/Platform-Windows-blue?style=for-the-badge)
+![Language](https://img.shields.io/badge/Language-Python_3.12-yellow?style=for-the-badge)
+![GUI](https://img.shields.io/badge/GUI-CustomTkinter-green?style=for-the-badge)
+![Architecture](https://img.shields.io/badge/Architecture-Serverless%20Swarm-purple?style=for-the-badge)
+
+**Die nächste Generation der Baustellendokumentation für Kanalsanierungs-Flotten.**
+
+Der **DiTom Site Manager** ist kein einfaches Dateiverwaltungsprogramm. Es ist ein hochspezialisiertes Operating-System für Sanierungsroboter-Teams. Es eliminiert manuellen Schreibaufwand, verhindert Dateikonflikte zwischen Anlagen und synchronisiert den Projektfortschritt in Echtzeit über eine intelligente, serverlose Cloud-Struktur.
+
+---
+
+## 🏗️ Der Operationelle Workflow
+
+### 1. Das Performance Cockpit (Dashboard)
+Dein Start in den Tag. Das System visualisiert live deine Erfolge (sanierte Stutzen & gefahrene Projekte). 
+
+![Dashboard Übersicht](images/DiTom_Site_Manager_v51_Beta_UI7hMrFWoa.png)
+
+* **Zentraler Einstieg:** Projektnummer und Ort eingeben – das System erledigt den Rest (Ordneranlage, Sync-Prüfung).
+* **Archiv-Zugriff:** Blitzschnelle Suche in tausenden lokalen Projekten durch optimierte Dateisystem-Scans.
+
+### 2. Deep-Work Modus (Dokumentation vor Ort)
+Hier passiert die eigentliche Arbeit. Das Interface ist für die harten Bedingungen im Regiewagen optimiert: Große Buttons, klare Kontraste und minimaler Input-Aufwand.
+
+![Arbeitsbereich](images/DiTom_Site_Manager_v51_Beta_gaw4V9hqPj.png)
+
+* **Smart Folders:** Erstelle Schadensordner (Stutzen, Liner, Riss) mit automatischer Metrierung und Zeitstempel.
+* **Intelligente Video-Logik:** Das System prüft lokal und in der Cloud, welche Video-Nummer als Nächstes dran ist (z.B. `1 nach san.mp4`). Keine überschriebenen Dateien mehr!
+* **OBS Studio Sync:** Live-Daten (Straße, Haltung, DN) werden direkt als Textquelle für dein Video-Overlay bereitgestellt.
+
+### 3. Cloud Swarm (Dezentrale Intelligenz)
+Mehrere Roboter arbeiten im selben Projekt? Kein Problem. Der Swarm-Sync hält alle auf demselben Stand.
+
+![Cloud Sync Status](images/DiTom_Site_Manager_v51_Beta_pqTEorOpVP.png)
+
+* **Ghost Data:** Übernimm Haltungsstrukturen von Kollegen per Doppelklick, ohne deren Gigabytes an Videodaten herunterladen zu müssen.
+* **Serverless Architecture:** Nutzt die GitHub API als sicheres, kostenloses Backend. Volle Datenhoheit und 0€ Hosting-Kosten.
+
+---
+
+## 🛠️ Technische Highlights
+
+| Feature | Beschreibung |
+| :--- | :--- |
+| **Smart Aufmaß** | Erkennt bestehende Excel-Tabellen und führt diese logisch fort (Teil 1 -> Teil 2). |
+| **Theme Engine** | 10 spezialisierte Designs (z.B. *Bio-Neural* für Nachtschichten) zur Schonung der Augen. |
+| **Hybrid-Speicher** | "Local-First" Ansatz: Videos bleiben lokal, Metadaten gehen in den Schwarm. |
+| **Auto-Reporting** | Generiert sofort druckfähige HTML-Tagesberichte für Bauleiter und Kunden. |
+
+---
+
+## 📦 Installation & Build
+
+### Voraussetzungen
+* **Windows 10/11**
+* **Python 3.12+** (für die Entwicklung)
+
+### EXE Erstellung
+Für den stabilen Einsatz im Wagen nutzen wir ein modulares Build-Verfahren (PyInstaller), um Pfadprobleme mit Tcl/Tk zu vermeiden.
+
+```powershell
+python build_exe.py
