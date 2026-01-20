@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <title>DiTom Satellite Map</title>
+            <meta charset="utf-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+            <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+            <style>
+                body{margin:0;padding:0;background:#1e1e1e}
+                #map{width:100%;height:100vh;background:#1e1e1e}
+                
+                /* Design für die Popups (Sprechblasen) */
+                .leaflet-popup-content-wrapper {
+                    background: #252526;
+                    color: #ffffff;
+                    border-left: 5px solid #007acc; /* Schicker Farbbalken links */
+                    border-radius: 4px;
+                }
+                .leaflet-popup-tip { background: #252526; }
+                .leaflet-popup-content { margin: 10px; font-family: 'Segoe UI', sans-serif; }
+            </style>
+        </head>
+        <body>
+            <div id="map"></div>
+            <script>
+                // Startpunkt: Mitte Deutschland, Zoom etwas näher
+                var map = L.map('map').setView([51.1657, 10.4515], 6);
+                
+                // --- GOOGLE SATELLITE LAYER ---
+                L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=de&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    attribution: '© Google Maps'
+                }).addTo(map);
+
+                var cities = ["Berlin", "Datteln", "Katiiii", "Hamm", "Olfen", "Brilon", "Ahlen", "Dorsten"];
+
+                async function plot() {
+                    for(const city of cities) {
+                        try {
+                            // Wir fragen Nominatim nach Koordinaten
+                            let r = await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&country=Germany&format=json`);
+                            let d = await r.json();
+                            
+                            if(d && d.length > 0) {
+                                // Marker setzen
+                                L.marker([d[0].lat, d[0].lon]).addTo(map)
+                                .bindPopup(`
+                                    <div style="min-width: 120px;">
+                                        <b style="font-size: 14px; color: #007acc">${city}</b><br>
+                                        <span style="font-size: 11px; color: #cccccc">📍 Projektstandort</span>
+                                    </div>
+                                `);
+                            }
+                        } catch(e) { console.log(e); }
+                        
+                        // Kurze Pause um die API nicht zu überlasten
+                        await new Promise(r => setTimeout(r, 600)); 
+                    }
+                }
+                plot();
+            </script>
+        </body>
+        </html>
