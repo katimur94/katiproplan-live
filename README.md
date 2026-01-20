@@ -1,3 +1,7 @@
+Hier ist eine optimierte, visuell ansprechende Version der README.md.
+
+Ich habe die Struktur logisch aufgebaut: Vom Start (Dashboard) über die Einrichtung (Config) hin zum täglichen Workflow (Arbeiten, Speichern, Sync). Die Bilder sind exakt an den Stellen platziert, wo die Funktion erklärt wird, damit Text und Bild eine Einheit bilden.
+
 🤖 DiTom Site Manager v53 "Total Swarm"
 
 ![alt text](https://img.shields.io/badge/Version-v53.0-brightgreen?style=for-the-badge)
@@ -8,131 +12,120 @@
 
 ![alt text](https://img.shields.io/badge/Backend-Serverless%20GitHub%20Swarm-purple?style=for-the-badge)
 
+Das Betriebssystem für deine Sanierungs-Flotte.
+Der DiTom Site Manager verbindet lokale Performance mit globaler Vernetzung. Er organisiert Baustellen, synchronisiert Daten zwischen Robotern und automatisiert lästige Büroarbeit.
 
-![alt text](https://img.shields.io/badge/GUI-CustomTkinter-orange?style=for-the-badge)
+1. Das Cockpit (Dashboard)
 
-Das dezentrale Betriebssystem für moderne Kanalsanierungs-Flotten.
-Lokal autark. Global vernetzt. Maximal effizient.
-
-Der DiTom Site Manager v53 ist eine spezialisierte Dokumentations- und Management-Software für Sanierungsroboter. Sie kombiniert lokale Hochgeschwindigkeits-Dateiverwaltung mit einer innovativen "Swarm"-Architektur: Anstatt auf teure Server zu setzen, nutzt DiTom ein GitHub-Repository als Echtzeit-Datenbank.
-
-🚀 Neu in Version 53 (High-Priority Fixes)
-
-Diese Version bringt massive Stabilitätsverbesserungen für den täglichen Einsatz:
-
-⚡ Intelligenter Prozess-Neustart: Behebt den kritischen init.tcl-Fehler bei kompilierten EXEs. Die App erkennt ihren Laufzeit-Kontext und führt bei Config-Änderungen einen sauberen subprocess-Neustart durch.
-
-🎨 Dynamische Theme-Engine 2.0: Die ModernGauge-Widgets (Tachos) passen nun auch ihre Ring-Farben (ring_color) dynamisch an das gewählte Theme an.
-
-🛡️ Windows-Pfad-Sicherheit: Die Synchronisation (backend_swarm.py) wurde gehärtet. JSON-Daten werden nun per String-Slicing statt Regex injiziert, um Fehler mit Backslashes in Pfaden zu verhindern.
-
-🏗️ 1. Das Dashboard (Control Center)
-
-Das Dashboard ist dein zentraler Einstiegspunkt. Es visualisiert deine Performance und den Systemstatus in Echtzeit.
+Dein Startpunkt. Hier hast du sofortigen Überblick über deine Leistung und den Status des Systems.
 
 ![alt text](images/DiTom_Site_Manager_v51_Beta_UI7hMrFWoa.png)
 
-Live-Gauges: Die digitalen Tachos zeigen sanierte Stutzen und abgeschlossene Baustellen. Die Farben passen sich dynamisch deinem Theme an.
+Performance Tachos: Visualisieren in Echtzeit, wie viele Stutzen saniert und Baustellen abgeschlossen wurden.
 
-Online-Status: Ein Hintergrund-Thread prüft via DNS-Lookup (8.8.8.8) permanent die Verbindung zum Swarm.
+Operator Status: Zeigt an, wer eingeloggt ist und prüft im Hintergrund permanent die Verbindung zum Cloud-Schwarm.
 
-Schnellstart: Gib einfach Projekt-Nr. und Stadt ein. Das System prüft Cloud & Lokal und erstellt sofort die Tagesstruktur.
+Intelligente Suche: Gib unten einfach eine Projektnummer oder Stadt ein – das System findet den Pfad automatisch.
 
-🛠️ 2. Konfiguration & Setup
+2. System-Konfiguration
 
-Bevor der erste Roboter startet, wird das System hier kalibriert.
+Bevor es losgeht, wird der Roboter hier einmalig eingerichtet.
 
 ![alt text](images/DiTom_Site_Manager_v51_Beta_HBFOKMrLmn.png)
 
-Identität: Gib deiner Anlage einen Namen (z. B. "Roboter 1").
+Identität: Lege fest, wie dieser Roboter im Netzwerk heißt (z.B. "Test 1").
 
-Basis-Pfad: Wähle den Root-Pfad deiner externen Baustellen-Festplatte.
+Pfad-Management: Wähle den Basis-Ordner deiner externen Festplatte.
 
-Theme-Engine: Wähle aus 10 professionellen Designs (z. B. Corporate Dark, Bio-Neural), optimiert für die Arbeit im Regiewagen.
+GitHub Token: Der Schlüssel zum "Swarm". Hierüber synchronisieren sich alle Roboter verschlüsselt.
 
-Gefahrenzone: Hier können verwaiste Cloud-Daten des Roboters gelöscht werden.
+Design: Wähle aus 10 Themes (hier im Bild: Corporate Dark).
 
-🔍 3. Archiv & Intelligente Navigation
+3. Daten-Management & Archiv
 
-Die Navigation ist auf maximale Geschwindigkeit optimiert. Der Treeview filtert Tausende von Ordnern in Millisekunden.
+Der LOKAL-Tab ist dein Hochgeschwindigkeits-Archiv.
 
 ![alt text](images/DiTom_Site_Manager_v51_Beta_0g5DN6wjJ6.png)
 
-Das Kontext-Menü
+Struktur: Alle Projekte werden automatisch nach Jahren sortiert.
 
-Ein Rechtsklick bietet direkten Zugriff auf Profi-Funktionen:
+Kontext-Power: Ein Rechtsklick auf ein Projekt öffnet das Profi-Menü:
+
+🚀 Hier arbeiten: Lädt das Projekt sofort in die Bearbeitungsmaske.
+
+📂 Explorer: Öffnet den Windows-Ordner direkt.
+
+✏️ Umbenennen / Löschen: Verwaltet Ordner sicher auf der Festplatte.
+
+4. Der Arbeitsmodus (Workflow)
+
+Hier verbringst du 90% deiner Zeit. Die Maske ist auf minimale Klicks optimiert.
+
+A. Zielwahl & Ghost-Data
+
+Wähle Straße und Haltung. Das System zeigt dir nicht nur deine Ordner, sondern auch die deiner Kollegen.
 
 ![alt text](images/DiTom_Site_Manager_v51_Beta_McoQRufemq.png)
 
-🚀 HIER ARBEITEN: Lädt das Projekt sofort in den Arbeitsmodus.
+Dropdown: Intelligente Filterung der Haltungen.
 
-📂 Im Explorer öffnen: Kein mühsames Suchen mehr im Windows Explorer.
+Ordner Öffnen: Erstellt bei Bedarf sofort die Ordnerstruktur auf der Festplatte, falls sie noch nicht existiert.
 
-✏️ Umbenennen: Benennt Ordner sicher auf Dateisystemebene um.
+B. Historie & Übersicht
 
-🗑️ Löschen: Entfernt Altlasten (mit Sicherheitsabfrage).
+Auf der rechten Seite siehst du die "Lebensgeschichte" der aktuellen Haltung.
 
-🏗️ 4. Arbeitsmodus (The Workbench)
+![alt text](images/DiTom_Site_Manager_v51_Beta_3NvbIj8UeW.png)
 
-Hier findet die tägliche Dokumentation statt. Alles ist auf minimale Klicks ausgelegt.
+Historie (Rechts):
 
-![alt text](images/DiTom_Site_Manager_v51_Beta_gaw4V9hqPj.png)
+🔵 Blaue Punkte: Daten aus der Cloud (von Kollegen).
 
-Ghost-Structure: Das Dropdown zeigt blau markierte Einträge – das sind Daten, die Kollegen bereits in der Cloud angelegt haben. Ein Klick übernimmt die Struktur.
+🟢 Grüne Punkte: Daten liegen lokal bei dir.
 
-Smart-Recorder: Der "REC"-Button prüft Lokal UND in der Cloud, welche Videonummer als nächstes frei ist.
+Maßnahmen: Erstelle mit einem Klick Unterordner wie 14,50m Stutzen.
 
-Beispiel: Kollege A hat 1 vor san.mp4 hochgeladen. DiTom vergibt automatisch 2 vor san.mp4.
+C. Smart Recording
 
-📡 OBS UPDATE: Sendet Projektdaten (Stadt, Straße, Haltung) in Echtzeit an OBS Studio für Video-Overlays.
+Der "REC"-Button denkt mit. Er prüft in der Cloud, welche Videonummer frei ist.
 
-☁️ 5. Cloud Swarm Sync
+![alt text](images/DiTom_Site_Manager_v51_Beta_n7civmPMyw.png)
 
-Abgleich der Tageserfolge mit der gesamten Flotte über das serverlose GitHub-Backend.
+Log-Konsole: Im unteren Bereich siehst du genau, was passiert.
 
-![alt text](images/DiTom_Site_Manager_v51_Beta_pqTEorOpVP.png)
+Beispiel im Bild: Das System erkennt 11,10m Stutzen, prüft Lokal & Cloud und speichert das Video automatisch als Nummer 6, um Überschreiben zu verhindern.
 
-Ghost Mode: In der Cloud-Ansicht (Reiter "CLOUD") siehst du in Echtzeit, an welchen Projekten andere Roboter gerade arbeiten.
-
-Sync: Ein Klick synchronisiert deinen lokalen Stand (obs_live.txt, Ordnerstruktur, Statistiken) mit dem globalen HTML-Template.
-
-📊 6. Profi-Tools
+5. Automatisierung & Cloud
 Smart Aufmaß
 
-Kein manuelles Kopieren von Excel-Tabellen mehr.
+Schluss mit manuellem Excel-Kopieren.
 
 ![alt text](images/DiTom_Site_Manager_v51_Beta_XcTS3lEpHp.png)
 
-Das System scannt nach dem letzten Aufmaß (z. B. "Teil 2") – egal ob lokal oder im Swarm.
+Klicke auf Smart Aufmaß.
 
-Es erstellt automatisch "Teil 3" als Kopie der Vorlage und öffnet es.
+Das System sucht das letzte Aufmaß (z.B. "Teil 4"), kopiert es, benennt es in "Teil 5" um und öffnet es direkt in Excel (oder deiner gewählten App).
 
-HTML-Reporting & Maps
+Cloud Swarm Sync
 
-Bericht: Generiert eine Tagesbericht.html mit einer Übersicht aller Medien der Haltung.
+Der Tagesabschluss.
 
-Satellite Map: Erstellt eine interaktive Karte (map_view.html) aller Projektstandorte basierend auf den Städtenamen.
+![alt text](images/DiTom_Site_Manager_v51_Beta_pqTEorOpVP.png)
 
-⚙️ Technische Details (Build)
+Mit einem Klick auf JETZT SYNCHRONISIEREN werden deine lokalen Erfolge (Stutzen, Meter, Videos) in den globalen "Swarm" hochgeladen.
 
-Die Software wird mittels PyInstaller im --onedir Modus gebaut, um Startzeiten zu minimieren.
+Alle anderen Roboter sehen sofort deine Fortschritte als "Ghost-Data" in ihren Systemen.
 
-Wichtig für EXE-Nutzer:
-Die Datei DiTom_Site_Manager_v53.exe darf NICHT aus ihrem Ordner bewegt werden. Der Ordner _internal enthält die Python-Runtime und muss immer neben der EXE liegen.
+⚙️ Installation (Windows)
 
-code
-Bash
-download
-content_copy
-expand_less
-# Build Befehl
-python build_exe.py
-📝 Lizenz & Copyright
+Die Software wird als Portable EXE ausgeliefert.
 
-DiTom Site Manager ist proprietäre Software für professionelle Kanalsanierungs-Unternehmen.
+Lege die DiTom_Site_Manager_v53.exe und den Ordner _internal in ein Verzeichnis deiner Wahl.
 
-Entwickler: Timur Kalayci
+Starte die EXE.
 
-Copyright: © 2026
+Gehe zu Config und wähle deinen Festplatten-Pfad.
 
-Lizenz: Closed Source / Interne Nutzung.
+Fertig.
+
+Copyright © 2026 Timur Kalayci - Developed for internal use.
